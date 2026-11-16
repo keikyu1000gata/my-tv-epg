@@ -1,0 +1,29 @@
+name: Build Terrestrial EPG
+on:
+  schedule:
+    - cron: '15 19 * * *' # 日本時間 04:15 に毎日自動更新
+    - cron: '15 7 * * *'  # 日本時間 16:15 にも自動更新
+  workflow_dispatch:      # 手動実行ボタン
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python build_epg.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+      - id: deployment
+        uses: actions/deploy-pages@v4
